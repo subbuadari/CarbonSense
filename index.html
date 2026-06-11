@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; img-src 'self' data:;" />
+  <meta name="description"
+    content="CarbonWise – Track, understand, and reduce your personal carbon footprint with AI-powered insights and personalized action plans." />
+  <meta name="theme-color" content="#0D1B0F" />
+  <title>CarbonWise – Personal Carbon Footprint Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Skip to main content for accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- App Shell -->
+  <div id="app" role="application" aria-label="CarbonWise Carbon Footprint Tracker">
+
+    <!-- Onboarding Screen -->
+    <section id="screen-onboarding" class="screen screen--active" aria-label="Welcome to CarbonWise">
+      <div class="onboarding">
+        <div class="onboarding__hero">
+          <div class="leaf-bg" aria-hidden="true">
+            <div class="leaf-particle"></div>
+            <div class="leaf-particle"></div>
+            <div class="leaf-particle"></div>
+            <div class="leaf-particle"></div>
+            <div class="leaf-particle"></div>
+          </div>
+          <div class="onboarding__logo" aria-hidden="true">
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" role="img" aria-label="CarbonWise leaf logo">
+              <circle cx="32" cy="32" r="32" fill="#00C97F" fill-opacity="0.15"/>
+              <path d="M32 8C20 8 12 20 12 32C12 44 20 52 32 52C44 52 52 44 52 32C52 20 44 8 32 8Z" fill="#00C97F" fill-opacity="0.3"/>
+              <path d="M32 14C22 14 16 24 32 38C48 24 42 14 32 14Z" fill="#00C97F"/>
+              <path d="M32 38L32 50" stroke="#00C97F" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h1 class="onboarding__title">CarbonWise</h1>
+          <p class="onboarding__tagline">Understand, track, and shrink your carbon footprint — one smart action at a time.</p>
+        </div>
+
+        <form id="onboarding-form" class="onboarding__form glass-card" novalidate aria-label="Profile setup form">
+          <h2 class="form__section-title">Let's set up your profile</h2>
+
+          <div class="form-group">
+            <label for="user-name" class="form-label">Your Name <span aria-hidden="true">*</span></label>
+            <input type="text" id="user-name" name="userName" class="form-input"
+              placeholder="e.g. Alex" required
+              aria-required="true"
+              maxlength="50"
+              autocomplete="given-name" />
+            <span class="form-error" id="user-name-error" role="alert" aria-live="polite"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="user-region" class="form-label">Region <span aria-hidden="true">*</span></label>
+            <select id="user-region" name="userRegion" class="form-input form-select"
+              required aria-required="true">
+              <option value="">Select your region…</option>
+              <option value="north_america">North America</option>
+              <option value="europe">Europe</option>
+              <option value="asia_pacific">Asia Pacific</option>
+              <option value="south_asia">South Asia</option>
+              <option value="latin_america">Latin America</option>
+              <option value="africa">Africa</option>
+              <option value="middle_east">Middle East</option>
+            </select>
+            <span class="form-error" id="user-region-error" role="alert" aria-live="polite"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="household-size" class="form-label">Household Size</label>
+            <div class="stepper" role="group" aria-label="Household size selector">
+              <button type="button" class="stepper__btn" id="household-dec"
+                aria-label="Decrease household size" data-action="dec">−</button>
+              <input type="number" id="household-size" name="householdSize"
+                class="form-input stepper__input" value="1" min="1" max="10"
+                aria-describedby="household-hint" readonly />
+              <button type="button" class="stepper__btn" id="household-inc"
+                aria-label="Increase household size" data-action="inc">+</button>
+            </div>
+            <span class="form-hint" id="household-hint">Number of people in your home</span>
+          </div>
+
+          <div class="form-group">
+            <fieldset>
+              <legend class="form-label">Lifestyle (select all that apply)</legend>
+              <div class="checkbox-grid" role="group">
+                <label class="checkbox-pill">
+                  <input type="checkbox" name="lifestyle" value="vegan" />
+                  <span>🌱 Vegan</span>
+                </label>
+                <label class="checkbox-pill">
+                  <input type="checkbox" name="lifestyle" value="vegetarian" />
+                  <span>🥦 Vegetarian</span>
+                </label>
+                <label class="checkbox-pill">
+                  <input type="checkbox" name="lifestyle" value="car_free" />
+                  <span>🚲 Car-free</span>
+                </label>
+                <label class="checkbox-pill">
+                  <input type="checkbox" name="lifestyle" value="renewable_energy" />
+                  <span>☀️ Renewable Energy</span>
+                </label>
+                <label class="checkbox-pill">
+                  <input type="checkbox" name="lifestyle" value="frequent_flyer" />
+                  <span>✈️ Frequent Flyer</span>
+                </label>
+                <label class="checkbox-pill">
+                  <input type="checkbox" name="lifestyle" value="minimalist" />
+                  <span>♻️ Minimalist</span>
+                </label>
+              </div>
+            </fieldset>
+          </div>
+
+          <button type="submit" class="btn btn--primary btn--full" id="onboarding-submit">
+            <span>Start Tracking</span>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Main App -->
+    <div id="screen-main" class="screen" aria-hidden="true">
+      <!-- Header / Nav -->
+      <header class="app-header" role="banner">
+        <div class="header__brand">
+          <svg width="28" height="28" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <path d="M32 14C22 14 16 24 32 38C48 24 42 14 32 14Z" fill="#00C97F"/>
+            <path d="M32 38L32 50" stroke="#00C97F" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          <span class="header__title">CarbonWise</span>
+        </div>
+        <div class="header__user" id="header-user-info" aria-live="polite"></div>
+        <button class="btn btn--ghost btn--sm" id="reset-btn"
+          aria-label="Reset all data and start over"
+          title="Reset data">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2 8C2 4.686 4.686 2 8 2C10.122 2 11.989 3.066 13.1 4.683M14 8C14 11.314 11.314 14 8 14C5.878 14 4.011 12.934 2.9 11.317" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M13 2L13 5L10 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 14L3 11L6 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Reset
+        </button>
+      </header>
+
+      <!-- Bottom Nav -->
+      <nav class="bottom-nav" role="navigation" aria-label="Main navigation">
+        <button class="nav-btn nav-btn--active" data-tab="dashboard" aria-selected="true" role="tab" aria-controls="tab-dashboard">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/>
+            <rect x="12" y="2" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/>
+            <rect x="2" y="12" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/>
+            <rect x="12" y="12" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-btn" data-tab="calculator" aria-selected="false" role="tab" aria-controls="tab-calculator">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+            <rect x="3" y="2" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M7 7H15M7 11H15M7 15H11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span>Calculate</span>
+        </button>
+        <button class="nav-btn" data-tab="insights" aria-selected="false" role="tab" aria-controls="tab-insights">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+            <circle cx="11" cy="9" r="5" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M8.5 14.5L7 20M13.5 14.5L15 20M7 20H15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Insights</span>
+        </button>
+        <button class="nav-btn" data-tab="actions" aria-selected="false" role="tab" aria-controls="tab-actions">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+            <path d="M4 11L9 16L18 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Actions</span>
+        </button>
+      </nav>
+
+      <!-- Tab Content -->
+      <main id="main-content" class="tab-content">
+
+        <!-- DASHBOARD TAB -->
+        <div id="tab-dashboard" class="tab-panel tab-panel--active" role="tabpanel" aria-label="Dashboard">
+          <div class="tab-panel__inner">
+            <div class="section-header">
+              <h2 class="section-title">Your Carbon Dashboard</h2>
+              <span class="section-subtitle" id="dashboard-date" aria-live="polite"></span>
+            </div>
+
+            <!-- Score Card -->
+            <div class="score-card glass-card" role="region" aria-label="Carbon score overview">
+              <div class="score-card__gauge-wrap">
+                <canvas id="gauge-canvas" width="200" height="120"
+                  aria-label="Carbon footprint gauge" role="img"></canvas>
+                <div class="score-card__value" aria-live="polite">
+                  <span id="score-display" class="score-number">0</span>
+                  <span class="score-unit">kg CO₂e/mo</span>
+                </div>
+              </div>
+              <div class="score-card__meta">
+                <div class="score-meta-item">
+                  <span class="meta-label">Your Score</span>
+                  <span class="meta-value meta-value--highlight" id="score-label">–</span>
+                </div>
+                <div class="score-meta-item">
+                  <span class="meta-label">Global Avg</span>
+                  <span class="meta-value">400 kg/mo</span>
+                </div>
+                <div class="score-meta-item">
+                  <span class="meta-label">Target</span>
+                  <span class="meta-value" id="score-target">167 kg/mo</span>
+                </div>
+              </div>
+              <div class="score-card__compare" aria-live="polite">
+                <div class="compare-bar" role="group" aria-label="Comparison bars">
+                  <div class="compare-row">
+                    <span class="compare-label">You</span>
+                    <div class="compare-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="1000" aria-label="Your footprint">
+                      <div class="compare-fill compare-fill--you" id="compare-you"></div>
+                    </div>
+                    <span class="compare-val" id="compare-you-val">–</span>
+                  </div>
+                  <div class="compare-row">
+                    <span class="compare-label">Avg</span>
+                    <div class="compare-track">
+                      <div class="compare-fill compare-fill--avg" style="width:40%"></div>
+                    </div>
+                    <span class="compare-val">400</span>
+                  </div>
+                  <div class="compare-row">
+                    <span class="compare-label">Target</span>
+                    <div class="compare-track">
+                      <div class="compare-fill compare-fill--target" style="width:16.7%"></div>
+                    </div>
+                    <span class="compare-val">167</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Category Breakdown -->
+            <div class="glass-card" role="region" aria-label="Emissions by category">
+              <h3 class="card-title">Emissions Breakdown</h3>
+              <canvas id="donut-canvas" width="300" height="200"
+                aria-label="Donut chart showing emissions by category" role="img"></canvas>
+              <div class="donut-legend" id="donut-legend" aria-label="Category legend"></div>
+            </div>
+
+            <!-- Trend Chart -->
+            <div class="glass-card" role="region" aria-label="Monthly trend">
+              <div class="card-header-row">
+                <h3 class="card-title">Monthly Trend</h3>
+                <span class="trend-badge" id="trend-badge" aria-live="polite"></span>
+              </div>
+              <canvas id="trend-canvas" width="320" height="160"
+                aria-label="Line chart showing monthly carbon footprint trend" role="img"></canvas>
+            </div>
+
+            <!-- Goal Progress -->
+            <div class="glass-card goal-card" role="region" aria-label="Monthly goal progress">
+              <div class="goal-card__text">
+                <h3 class="card-title">Monthly Goal</h3>
+                <p class="goal-desc" id="goal-desc">Set a reduction goal to track your progress.</p>
+                <button class="btn btn--outline btn--sm" id="set-goal-btn" aria-label="Set or update monthly carbon reduction goal">
+                  Set Goal
+                </button>
+              </div>
+              <div class="goal-ring-wrap" aria-hidden="true">
+                <canvas id="goal-canvas" width="100" height="100"></canvas>
+                <span class="goal-pct" id="goal-pct">–</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CALCULATOR TAB -->
+        <div id="tab-calculator" class="tab-panel" role="tabpanel" aria-label="Carbon Calculator" aria-hidden="true">
+          <div class="tab-panel__inner">
+            <div class="section-header">
+              <h2 class="section-title">Carbon Calculator</h2>
+              <p class="section-subtitle">Fill in your activities to estimate your footprint</p>
+            </div>
+
+            <form id="calculator-form" novalidate aria-label="Carbon footprint calculator">
+
+              <!-- Home Energy -->
+              <details class="calc-section" open>
+                <summary class="calc-section__header" aria-expanded="true">
+                  <span class="calc-icon" aria-hidden="true">🏠</span>
+                  <span>Home Energy</span>
+                  <span class="calc-score" id="cat-score-energy" aria-label="Home energy emission score">0 kg</span>
+                  <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  </svg>
+                </summary>
+                <div class="calc-section__body">
+                  <div class="form-group">
+                    <label for="elec-kwh" class="form-label">Monthly electricity (kWh)</label>
+                    <input type="range" id="elec-kwh" name="elecKwh" class="form-range"
+                      min="0" max="2000" step="10" value="300"
+                      aria-describedby="elec-kwh-val" />
+                    <div class="range-val-row">
+                      <span class="range-min">0</span>
+                      <output id="elec-kwh-val" for="elec-kwh" class="range-output">300 kWh</output>
+                      <span class="range-max">2000</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="gas-usage" class="form-label">Monthly natural gas (m³)</label>
+                    <input type="range" id="gas-usage" name="gasUsage" class="form-range"
+                      min="0" max="500" step="5" value="50"
+                      aria-describedby="gas-usage-val" />
+                    <div class="range-val-row">
+                      <span class="range-min">0</span>
+                      <output id="gas-usage-val" for="gas-usage" class="range-output">50 m³</output>
+                      <span class="range-max">500</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="renewable-pct" class="form-label">Renewable energy share (%)</label>
+                    <input type="range" id="renewable-pct" name="renewablePct" class="form-range"
+                      min="0" max="100" step="5" value="0"
+                      aria-describedby="renewable-pct-val" />
+                    <div class="range-val-row">
+                      <span class="range-min">0%</span>
+                      <output id="renewable-pct-val" for="renewable-pct" class="range-output">0%</output>
+                      <span class="range-max">100%</span>
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <!-- Transport -->
+              <details class="calc-section">
+                <summary class="calc-section__header">
+                  <span class="calc-icon" aria-hidden="true">🚗</span>
+                  <span>Transport</span>
+                  <span class="calc-score" id="cat-score-transport" aria-label="Transport emission score">0 kg</span>
+                  <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  </svg>
+                </summary>
+                <div class="calc-section__body">
+                  <div class="form-group">
+                    <label for="car-type" class="form-label">Primary vehicle</label>
+                    <select id="car-type" name="carType" class="form-input form-select">
+                      <option value="none">No car / Walk / Bike</option>
+                      <option value="electric">Electric Vehicle</option>
+                      <option value="hybrid">Hybrid</option>
+                      <option value="small_petrol">Small Petrol/Gas Car</option>
+                      <option value="medium_petrol" selected>Medium Petrol/Gas Car</option>
+                      <option value="large_petrol">Large SUV / Truck</option>
+                      <option value="diesel">Diesel Car</option>
+                    </select>
+                  </div>
+                  <div class="form-group" id="car-km-group">
+                    <label for="car-km" class="form-label">Weekly driving distance (km)</label>
+                    <input type="range" id="car-km" name="carKm" class="form-range"
+                      min="0" max="1000" step="10" value="100"
+                      aria-describedby="car-km-val" />
+                    <div class="range-val-row">
+                      <span class="range-min">0</span>
+                      <output id="car-km-val" for="car-km" class="range-output">100 km/wk</output>
+                      <span class="range-max">1000</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="public-transit" class="form-label">Weekly public transit (km)</label>
+                    <input type="range" id="public-transit" name="publicTransit" class="form-range"
+                      min="0" max="500" step="10" value="0"
+                      aria-describedby="public-transit-val" />
+                    <div class="range-val-row">
+                      <span class="range-min">0</span>
+                      <output id="public-transit-val" for="public-transit" class="range-output">0 km/wk</output>
+                      <span class="range-max">500</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="flights-year" class="form-label">Flights per year</label>
+                    <input type="range" id="flights-year" name="flightsYear" class="form-range"
+                      min="0" max="30" step="1" value="2"
+                      aria-describedby="flights-year-val" />
+                    <div class="range-val-row">
+                      <span class="range-min">0</span>
+                      <output id="flights-year-val" for="flights-year" class="range-output">2 flights</output>
+                      <span class="range-max">30</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="flight-type" class="form-label">Typical flight distance</label>
+                    <select id="flight-type" name="flightType" class="form-input form-select">
+                      <option value="short">Short-haul (&lt;3h)</option>
+                      <option value="medium" selected>Medium-haul (3–6h)</option>
+                      <option value="long">Long-haul (&gt;6h)</option>
+                    </select>
+                  </div>
+                </div>
+              </details>
+
+              <!-- Food & Diet -->
+              <details class="calc-section">
+                <summary class="calc-section__header">
+                  <span class="calc-icon" aria-hidden="true">🍔</span>
+                  <span>Food & Diet</span>
+                  <span class="calc-score" id="cat-score-food" aria-label="Food emission score">0 kg</span>
+                  <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  </svg>
+                </summary>
+                <div class="calc-section__body">
+                  <div class="form-group">
+                    <label for="diet-type" class="form-label">Diet type</label>
+                    <select id="diet-type" name="dietType" class="form-input form-select">
+                      <option value="vegan">Vegan</option>
+                      <option value="vegetarian">Vegetarian</option>
+                      <option value="pescatarian">Pescatarian</option>
+                      <option value="flexitarian">Flexitarian (mostly plant-based)</option>
+                      <option value="omnivore" selected>Omnivore (balanced meat)</option>
+                      <option value="heavy_meat">Heavy meat eater</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="food-waste" class="form-label">Food waste level</label>
+                    <select id="food-waste" name="foodWaste" class="form-input form-select">
+                      <option value="low">Low (compost / very little waste)</option>
+                      <option value="medium" selected>Medium (occasional waste)</option>
+                      <option value="high">High (significant waste)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="local-food" class="form-label">% food from local / seasonal sources</label>
+                    <input type="range" id="local-food" name="localFood" class="form-range"
+                      min="0" max="100" step="10" value="20"
+                      aria-describedby="local-food-val" />
+                    <div class="range-val-row">
+                      <span class="range-min">0%</span>
+                      <output id="local-food-val" for="local-food" class="range-output">20%</output>
+                      <span class="range-max">100%</span>
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <!-- Shopping -->
+              <details class="calc-section">
+                <summary class="calc-section__header">
+                  <span class="calc-icon" aria-hidden="true">🛍️</span>
+                  <span>Shopping</span>
+                  <span class="calc-score" id="cat-score-shopping" aria-label="Shopping emission score">0 kg</span>
+                  <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  </svg>
+                </summary>
+                <div class="calc-section__body">
+                  <div class="form-group">
+                    <label for="clothing-items" class="form-label">New clothing items per month</label>
+                    <input type="range" id="clothing-items" name="clothingItems" class="form-range"
+                      min="0" max="20" step="1" value="2"
+                      aria-describedby="clothing-items-val" />
+                    <div class="range-val-row">
+                      <span class="range-min">0</span>
+                      <output id="clothing-items-val" for="clothing-items" class="range-output">2 items</output>
+                      <span class="range-max">20</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="electronics" class="form-label">New electronics per year</label>
+                    <input type="range" id="electronics" name="electronics" class="form-range"
+                      min="0" max="10" step="1" value="1"
+                      aria-describedby="electronics-val" />
+                    <div class="range-val-row">
+                      <span class="range-min">0</span>
+                      <output id="electronics-val" for="electronics" class="range-output">1 device/yr</output>
+                      <span class="range-max">10</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="shopping-spend" class="form-label">Monthly general shopping (USD)</label>
+                    <input type="range" id="shopping-spend" name="shoppingSpend" class="form-range"
+                      min="0" max="2000" step="50" value="200"
+                      aria-describedby="shopping-spend-val" />
+                    <div class="range-val-row">
+                      <span class="range-min">$0</span>
+                      <output id="shopping-spend-val" for="shopping-spend" class="range-output">$200</output>
+                      <span class="range-max">$2000</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="secondhand-pct" class="form-label">% purchases that are secondhand</label>
+                    <input type="range" id="secondhand-pct" name="secondhandPct" class="form-range"
+                      min="0" max="100" step="10" value="10"
+                      aria-describedby="secondhand-pct-val" />
+                    <div class="range-val-row">
+                      <span class="range-min">0%</span>
+                      <output id="secondhand-pct-val" for="secondhand-pct" class="range-output">10%</output>
+                      <span class="range-max">100%</span>
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <!-- Waste -->
+              <details class="calc-section">
+                <summary class="calc-section__header">
+                  <span class="calc-icon" aria-hidden="true">♻️</span>
+                  <span>Waste & Recycling</span>
+                  <span class="calc-score" id="cat-score-waste" aria-label="Waste emission score">0 kg</span>
+                  <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  </svg>
+                </summary>
+                <div class="calc-section__body">
+                  <div class="form-group">
+                    <label for="recycling-rate" class="form-label">Recycling rate (%)</label>
+                    <input type="range" id="recycling-rate" name="recyclingRate" class="form-range"
+                      min="0" max="100" step="10" value="40"
+                      aria-describedby="recycling-rate-val" />
+                    <div class="range-val-row">
+                      <span class="range-min">0%</span>
+                      <output id="recycling-rate-val" for="recycling-rate" class="range-output">40%</output>
+                      <span class="range-max">100%</span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="composting" class="form-label">Do you compost food waste?</label>
+                    <select id="composting" name="composting" class="form-input form-select">
+                      <option value="yes">Yes, regularly</option>
+                      <option value="sometimes">Sometimes</option>
+                      <option value="no" selected>No</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="waste-bags" class="form-label">Bin bags per week</label>
+                    <input type="range" id="waste-bags" name="wasteBags" class="form-range"
+                      min="0" max="10" step="1" value="2"
+                      aria-describedby="waste-bags-val" />
+                    <div class="range-val-row">
+                      <span class="range-min">0</span>
+                      <output id="waste-bags-val" for="waste-bags" class="range-output">2 bags</output>
+                      <span class="range-max">10</span>
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <div class="calc-total-bar glass-card" role="region" aria-live="polite" aria-label="Total carbon footprint">
+                <span class="calc-total__label">Estimated Monthly Footprint</span>
+                <span class="calc-total__value" id="calc-total-display">0 kg CO₂e</span>
+              </div>
+
+              <button type="button" class="btn btn--primary btn--full" id="save-calc-btn">
+                <span>Save & Update Dashboard</span>
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <path d="M9 2v14M9 2L5 6M9 2L13 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </button>
+
+            </form>
+          </div>
+        </div>
+
+        <!-- INSIGHTS TAB -->
+        <div id="tab-insights" class="tab-panel" role="tabpanel" aria-label="Personalized Insights" aria-hidden="true">
+          <div class="tab-panel__inner">
+            <div class="section-header">
+              <h2 class="section-title">Your Insights</h2>
+              <p class="section-subtitle">AI-powered recommendations based on your data</p>
+            </div>
+            <div id="insights-container" aria-live="polite">
+              <div class="empty-state" id="insights-empty">
+                <div class="empty-state__icon" aria-hidden="true">🔍</div>
+                <h3>No data yet</h3>
+                <p>Complete the calculator to get personalized insights.</p>
+                <button class="btn btn--primary" data-goto="calculator">Go to Calculator</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTIONS TAB -->
+        <div id="tab-actions" class="tab-panel" role="tabpanel" aria-label="Action Tracker" aria-hidden="true">
+          <div class="tab-panel__inner">
+            <div class="section-header">
+              <h2 class="section-title">Action Tracker</h2>
+              <p class="section-subtitle">Pledge actions and track your impact</p>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="action-stats" role="region" aria-label="Action statistics">
+              <div class="stat-chip">
+                <span class="stat-chip__val" id="actions-completed">0</span>
+                <span class="stat-chip__lbl">Completed</span>
+              </div>
+              <div class="stat-chip">
+                <span class="stat-chip__val" id="actions-saved">0</span>
+                <span class="stat-chip__lbl">kg CO₂ Saved</span>
+              </div>
+              <div class="stat-chip stat-chip--streak">
+                <span class="stat-chip__val" id="actions-streak">0🔥</span>
+                <span class="stat-chip__lbl">Day Streak</span>
+              </div>
+            </div>
+
+            <!-- Actions List -->
+            <div id="actions-list" class="actions-list" role="list" aria-label="Available actions">
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- Goal Modal -->
+    <div id="goal-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+      <div class="modal-box glass-card">
+        <h2 class="modal-title" id="modal-title">Set Monthly Goal</h2>
+        <p class="modal-desc">Choose a target monthly carbon footprint (kg CO₂e)</p>
+        <div class="form-group">
+          <label for="goal-input" class="form-label">Monthly target (kg CO₂e)</label>
+          <input type="number" id="goal-input" class="form-input"
+            min="50" max="2000" step="10" value="200"
+            aria-describedby="goal-input-hint" />
+          <span class="form-hint" id="goal-input-hint">Current global target: 167 kg/mo (2 tonne/yr)</span>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn--outline" id="modal-cancel">Cancel</button>
+          <button class="btn btn--primary" id="modal-save">Save Goal</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Celebration overlay -->
+    <div id="celebration" class="celebration" aria-hidden="true" role="status"></div>
+
+    <!-- Toast notifications -->
+    <div id="toast-container" class="toast-container" role="region" aria-label="Notifications" aria-live="polite"></div>
+
+  </div><!-- /#app -->
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
