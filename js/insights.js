@@ -4,6 +4,9 @@
  * All logic is deterministic and auditable — no black-box ML required.
  */
 
+// ── Constants (defined before rules to avoid ReferenceError) ─────────────────
+const FLIGHT_KG = { short: 230, medium: 620, long: 1850 };
+
 // ── Insight Rule Definitions ──────────────────────────────────────────────────
 // Each rule: { id, icon, title, text, impact, saving, condition(emissions, inputs, profile) }
 
@@ -222,7 +225,6 @@ const INSIGHT_RULES = [
   },
 ];
 
-const FLIGHT_KG = { short: 230, medium: 620, long: 1850 };
 
 // ── Engine ────────────────────────────────────────────────────────────────────
 
