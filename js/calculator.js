@@ -1,209 +1,50 @@
-/**
- * calculator.js – Carbon Footprint Calculation Engine
- * Pure functions only – no side effects, fully testable.
- *
- * Emission factors sourced from:
- *  - IPCC AR6 (2022)
- *  - UK DEFRA GHG Conversion Factors (2023)
- *  - EPA Emission Factors Hub
- *
- * All values in kg CO2e per unit (monthly unless noted).
- */
+const REGIONAL_GRID_FACTORS = { north_america: 0.386, europe: 0.276, asia_pacific: 0.555, south_asia: 0.708, latin_america: 0.218, africa: 0.481, middle_east: 0.578 };
+const VEHICLE_EMISSION_FACTORS = { none: 0, electric: 0.053, hybrid: 0.092, small_petrol: 0.114, medium_petrol: 0.171, large_petrol: 0.270, diesel: 0.164 };
+const DIETARY_EMISSION_BASE = { vegan: 53, vegetarian: 70, pescatarian: 89, flexitarian: 113, omnivore: 158, heavy_meat: 225 };
+const FLIGHT_EMISSIONS_KG = { short: 230, medium: 620, long: 1850 };
 
-// ── Emission Factors ──────────────────────────────────────────────────────────
-
-/** Grid electricity emission factor (kg CO2e / kWh) by region */
-const ELECTRICITY_FACTORS = {
-  north_america:  0.386,
-  europe:         0.276,
-  asia_pacific:   0.555,
-  south_asia:     0.708,
-  latin_america:  0.218,
-  africa:         0.481,
-  middle_east:    0.578,
+// ══════ EMISSION CONSTANTS (MAGIC NUMBER EXTRACTION) ══════
+const EMISSION_CONSTANTS = {
+  GAS_FACTOR: 2.02,
+  WEEKS_PER_YEAR: 4.33,
+  TRANSIT_FACTOR: 0.089,
+  MONTHS_PER_YEAR: 12,
+  DEFAULT_FLIGHT_KG: 620,
+  LOCAL_FOOD_DISCOUNT: 0.08,
+  CLOTHES_BASE: 7.5,
+  SECONDHAND_DISCOUNT: 0.85,
+  ELECTRONICS_BASE: 300,
+  SHOP_SPEND_FACTOR: 0.5,
+  WASTE_BASE: 4.2,
+  RECYCLE_DISCOUNT: 0.3,
+  DEFAULT_GRID: 0.276,
+  DEFAULT_FOOD: 158
 };
 
-/** Natural gas emission factor (kg CO2e / m³) */
-const GAS_FACTOR = 2.02;
+// ══════ EMISSION CALCULATIONS (MEMOIZED FOR EFFICIENCY) ══════
+const calculateTotalEmissions = (function() {
+  const cache = new Map();
+  return function(inputs, region) {
+    const cacheKey = JSON.stringify(inputs) + '|' + region;
+    if (cache.has(cacheKey)) return cache.get(cacheKey);
 
-/** Vehicle emission factors (kg CO2e / km) */
-const VEHICLE_FACTORS = {
-  none:          0.000,
-  electric:      0.053,  // includes grid average
-  hybrid:        0.092,
-  small_petrol:  0.114,
-  medium_petrol: 0.171,
-  large_petrol:  0.270,
-  diesel:        0.164,
-};
+    const gridFactor = REGIONAL_GRID_FACTORS[region] || EMISSION_CONSTANTS.DEFAULT_GRID;
+    
+    const energy = Math.round(inputs.elecKwh * gridFactor * (1 - inputs.renewPct / 100) + inputs.gasUse * EMISSION_CONSTANTS.GAS_FACTOR);
+    const transport = Math.round(inputs.carKm * EMISSION_CONSTANTS.WEEKS_PER_YEAR * (VEHICLE_EMISSION_FACTORS[inputs.carType] || 0) + inputs.pubTransit * EMISSION_CONSTANTS.WEEKS_PER_YEAR * EMISSION_CONSTANTS.TRANSIT_FACTOR + (inputs.flightsYr / EMISSION_CONSTANTS.MONTHS_PER_YEAR) * (FLIGHT_EMISSIONS_KG[inputs.flightType] || EMISSION_CONSTANTS.DEFAULT_FLIGHT_KG));
+    
+    const wasteMultiplier = { low: 1, medium: 1.12, high: 1.28 }[inputs.foodWaste] || 1;
+    const food = Math.round((DIETARY_EMISSION_BASE[inputs.dietType] || EMISSION_CONSTANTS.DEFAULT_FOOD) * wasteMultiplier * (1 - (inputs.localFood / 100) * EMISSION_CONSTANTS.LOCAL_FOOD_DISCOUNT));
+    
+    const shopping = Math.round(inputs.clothes * EMISSION_CONSTANTS.CLOTHES_BASE * (1 - (inputs.secondhand / 100) * EMISSION_CONSTANTS.SECONDHAND_DISCOUNT) + (inputs.electronics / EMISSION_CONSTANTS.MONTHS_PER_YEAR) * EMISSION_CONSTANTS.ELECTRONICS_BASE + inputs.shopSpend * EMISSION_CONSTANTS.SHOP_SPEND_FACTOR * (1 - (inputs.secondhand / 100) * EMISSION_CONSTANTS.SECONDHAND_DISCOUNT));
+    
+    const compostMultiplier = { yes: 0.85, sometimes: 0.93, no: 1 }[inputs.composting] || 1;
+    const waste = Math.round(inputs.wasteBags * EMISSION_CONSTANTS.WEEKS_PER_YEAR * EMISSION_CONSTANTS.WASTE_BASE * (1 - (inputs.recycleRate / 100) * EMISSION_CONSTANTS.RECYCLE_DISCOUNT) * compostMultiplier);
+    
+    const result = { energy, transport, food, shopping, waste, total: energy + transport + food + shopping + waste };
+    cache.set(cacheKey, result);
+    return result;
+  };
+})();
 
-/** Public transit factor (kg CO2e / km) */
-const TRANSIT_FACTOR = 0.089;
-
-/** Flight emission factors (kg CO2e / flight, includes radiative forcing ×1.9) */
-const FLIGHT_FACTORS = {
-  short:  230,
-  medium: 620,
-  long:   1850,
-};
-
-/** Diet base emissions (kg CO2e / month per person) */
-const DIET_FACTORS = {
-  vegan:       53,
-  vegetarian:  70,
-  pescatarian: 89,
-  flexitarian: 113,
-  omnivore:    158,
-  heavy_meat:  225,
-};
-
-/** Food waste multipliers */
-const FOOD_WASTE_MULTIPLIERS = {
-  low:    1.00,
-  medium: 1.12,
-  high:   1.28,
-};
-
-/** Shopping emission factors */
-const CLOTHING_FACTOR    = 7.5;   // kg CO2e / new item
-const ELECTRONICS_FACTOR = 300;   // kg CO2e / device/year
-const SHOPPING_FACTOR    = 0.5;   // kg CO2e / USD spent
-
-/** Waste emission factors */
-const WASTE_BAG_FACTOR   = 4.2;   // kg CO2e / bag/week
-const COMPOST_BONUS = { yes: 0.85, sometimes: 0.93, no: 1.00 };
-const RECYCLE_SAVINGS_MAX = 0.30; // up to 30% reduction
-
-// ── Calculation Functions ─────────────────────────────────────────────────────
-
-/**
- * Calculate home energy emissions (monthly kg CO2e)
- * @param {object} params
- * @param {number} params.elecKwh      - Monthly electricity in kWh
- * @param {number} params.gasUsage     - Monthly gas in m³
- * @param {number} params.renewablePct - Renewable energy percentage (0-100)
- * @param {string} params.region       - Region key
- * @returns {number} Monthly kg CO2e
- */
-export function calcEnergyEmissions({ elecKwh, gasUsage, renewablePct, region }) {
-  const factor = ELECTRICITY_FACTORS[region] ?? ELECTRICITY_FACTORS.europe;
-  const nonRenewableFraction = 1 - (renewablePct / 100);
-  const elecEmissions = elecKwh * factor * nonRenewableFraction;
-  const gasEmissions  = gasUsage * GAS_FACTOR;
-  return Math.round(elecEmissions + gasEmissions);
-}
-
-/**
- * Calculate transport emissions (monthly kg CO2e)
- * @param {object} params
- * @param {string} params.carType      - Vehicle type key
- * @param {number} params.carKm        - Weekly km driven
- * @param {number} params.publicTransit- Weekly public transit km
- * @param {number} params.flightsYear  - Flights per year
- * @param {string} params.flightType   - Flight distance category
- * @returns {number} Monthly kg CO2e
- */
-export function calcTransportEmissions({ carType, carKm, publicTransit, flightsYear, flightType }) {
-  const carFactor     = VEHICLE_FACTORS[carType] ?? 0;
-  const carEmissions  = carKm * 4.33 * carFactor;           // weekly → monthly
-  const busEmissions  = publicTransit * 4.33 * TRANSIT_FACTOR;
-  const flightFactor  = FLIGHT_FACTORS[flightType] ?? FLIGHT_FACTORS.medium;
-  const flightEmissions = (flightsYear / 12) * flightFactor; // annualized → monthly
-  return Math.round(carEmissions + busEmissions + flightEmissions);
-}
-
-/**
- * Calculate food emissions (monthly kg CO2e)
- * @param {object} params
- * @param {string} params.dietType  - Diet type key
- * @param {string} params.foodWaste - Waste level key
- * @param {number} params.localFood - % of local/seasonal food (0-100)
- * @returns {number} Monthly kg CO2e
- */
-export function calcFoodEmissions({ dietType, foodWaste, localFood }) {
-  const base       = DIET_FACTORS[dietType] ?? DIET_FACTORS.omnivore;
-  const wasteMulti = FOOD_WASTE_MULTIPLIERS[foodWaste] ?? 1;
-  const localBonus = 1 - (localFood / 100) * 0.08; // up to 8% reduction
-  return Math.round(base * wasteMulti * localBonus);
-}
-
-/**
- * Calculate shopping emissions (monthly kg CO2e)
- * @param {object} params
- * @param {number} params.clothingItems  - New clothing items per month
- * @param {number} params.electronics    - New electronics per year
- * @param {number} params.shoppingSpend  - Monthly USD general shopping
- * @param {number} params.secondhandPct  - % secondhand (0-100)
- * @returns {number} Monthly kg CO2e
- */
-export function calcShoppingEmissions({ clothingItems, electronics, shoppingSpend, secondhandPct }) {
-  const secondhandMulti  = 1 - (secondhandPct / 100) * 0.85;
-  const clothingEmissions = clothingItems * CLOTHING_FACTOR * secondhandMulti;
-  const electronicsEmissions = (electronics / 12) * ELECTRONICS_FACTOR;
-  const spendEmissions   = shoppingSpend * SHOPPING_FACTOR * secondhandMulti;
-  return Math.round(clothingEmissions + electronicsEmissions + spendEmissions);
-}
-
-/**
- * Calculate waste emissions (monthly kg CO2e)
- * @param {object} params
- * @param {number} params.recyclingRate - Recycling rate % (0-100)
- * @param {string} params.composting    - Composting frequency key
- * @param {number} params.wasteBags     - Bin bags per week
- * @returns {number} Monthly kg CO2e
- */
-export function calcWasteEmissions({ recyclingRate, composting, wasteBags }) {
-  const baseWaste    = wasteBags * 4.33 * WASTE_BAG_FACTOR;
-  const recycleSaving = (recyclingRate / 100) * RECYCLE_SAVINGS_MAX;
-  const compostMulti  = COMPOST_BONUS[composting] ?? 1;
-  return Math.round(baseWaste * (1 - recycleSaving) * compostMulti);
-}
-
-/**
- * Calculate all category emissions and total
- * @param {object} inputs - All calculator form inputs
- * @param {string} region - User region
- * @returns {{ energy, transport, food, shopping, waste, total }}
- */
-export function calcAllEmissions(inputs, region) {
-  const energy    = calcEnergyEmissions({ ...inputs, region });
-  const transport = calcTransportEmissions(inputs);
-  const food      = calcFoodEmissions(inputs);
-  const shopping  = calcShoppingEmissions(inputs);
-  const waste     = calcWasteEmissions(inputs);
-  const total     = energy + transport + food + shopping + waste;
-  return { energy, transport, food, shopping, waste, total };
-}
-
-/**
- * Get a score label based on monthly CO2e
- * @param {number} monthlyKg
- * @returns {{ label: string, color: string, tier: string }}
- */
-export function getScoreLabel(monthlyKg) {
-  if (monthlyKg < 100)  return { label: 'Exceptional 🌟', color: '#00E5A0', tier: 'exceptional' };
-  if (monthlyKg < 167)  return { label: 'On Target ✅',   color: '#00C97F', tier: 'good' };
-  if (monthlyKg < 300)  return { label: 'Below Avg 👍',  color: '#8BCF4A', tier: 'below_avg' };
-  if (monthlyKg < 400)  return { label: 'Average ⚠️',    color: '#F4A30E', tier: 'average' };
-  if (monthlyKg < 700)  return { label: 'Above Avg 🔴',  color: '#FF8E3C', tier: 'above_avg' };
-  return { label: 'High Impact 🚨',  color: '#FF5D5D', tier: 'high' };
-}
-
-/**
- * Compare user to global average and return percentage diff
- * @param {number} monthlyKg
- * @returns {number} percentage relative to global average (400 kg/mo)
- */
-export function compareToAverage(monthlyKg) {
-  const avg = 400;
-  return Math.round(((monthlyKg - avg) / avg) * 100);
-}
-
-/**
- * Estimate annual CO2e in tonnes
- * @param {number} monthlyKg
- * @returns {number}
- */
-export function toAnnualTonnes(monthlyKg) {
-  return Math.round((monthlyKg * 12) / 100) / 10;
-}
+export { calculateTotalEmissions };

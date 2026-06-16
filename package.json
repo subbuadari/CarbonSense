@@ -1,0 +1,11 @@
+{
+  "name": "carbonsense",
+  "version": "1.0.0",
+  "description": "Zero-dependency Carbon Footprint Tracker",
+  "type": "module",
+  "scripts": {
+    "test": "node --test js/*.test.js"
+  },
+  "author": "subbuadari",
+  "license": "MIT"
+}
